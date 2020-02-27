@@ -1,0 +1,382 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <title>my recipick</title>
+
+  <!-- Required meta tags -->
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+
+  <!-- Bootstrap CSS -->
+  <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css" integrity="sha384-Gn5384xqQ1aoWXA+058RXPxPg6fy4IWvTNh0E263XmFcJlSAwiGgFAW/dAiS6JXm" crossorigin="anonymous">
+
+  <!-- JS -->   
+  <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.4.1/jquery.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.12.9/umd/popper.min.js" integrity="sha384-ApNbgh9B+Y1QKtv3Rn7W3mgPxhU9K/ScQsAP7hUibX39j7fakFPskvXusvfa0b4Q" crossorigin="anonymous"></script>
+  <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/js/bootstrap.min.js" integrity="sha384-JZR6Spejh4U02d8jOt6vLEHfe/JQGiRRSQQxSfFWpi1MquVdAyjUar5+76PVCmYl" crossorigin="anonymous"></script>
+
+  <!-- 구글폰트 -->
+  <link href="https://fonts.googleapis.com/css?family=Stylish&display=swap" rel="stylesheet"/>
+  <script>
+    $(document).ready(function(){
+      $('#soomi_official').html('');
+      $('#soomi_follow').html('');
+      $('#show_all_recipe').html('');
+      alert('확인')
+      listing()
+    });
+
+
+
+    function listing() {
+        //공식 레시피 ajax연결 ok!
+        $.ajax({
+          type: "GET",
+          url: "/s_official_recipes",
+          data: {},
+          success: function(response){
+           if (response['result'] == 'success') {
+            let soomis_official = response['soomis_official'];
+            console.log(soomis_official);
+            for (let i = 0; i < soomis_official.length; i++) {
+              soomi_official_recipes_card(soomis_official[i]['image'], soomis_official[i]['title'], soomis_official[i]['posting_day'], soomis_official[i]['description'], soomis_official[i]['author'], soomis_official[i]['url'])
+            }
+          } else {
+            alert('레시피를 받아오지 못했습니다');
+          }
+        }
+      })
+
+        // 따라하기 레시피 ajax연결 ok!
+        $.ajax({
+          type: "GET",
+          url: "/s_follow_recipes",
+          data: {},
+          success: function(response){
+           if (response['result'] == 'success') {
+             let soomis_follow = response['soomis_follow'];
+             console.log(soomis_follow);
+             for (let i = 0; i < soomis_follow.length; i++) {
+              soomi_follow_recipes_card(soomis_follow[i]['image'], soomis_follow[i]['title'], soomis_follow[i]['posting_day'], soomis_follow[i]['description'], soomis_follow[i]['author'], soomis_follow[i]['url'])
+            } 
+          } else {
+            alert('레시피를 받아오지 못했습니다');
+          }
+        }
+      })
+      }
+
+      // 추천 레시피 목록 ajax 
+      //   $.ajax({
+      //     type: "GET",
+      //     url: "/s_show_recipes",
+      //     data: {},
+      //     success: function(response){
+      //      if (response['result'] == 'success') {
+      //        let soomis_show = response['soomis_show'];
+      //        console.log(soomis_show);
+      //        for (let i = 0; i < soomis_show.length; i++) {
+      //         soomi_show_recipes(soomis_show[i]['title'])
+
+      //       } 
+      //     } else {
+      //       alert('레시피를 받아오지 못했습니다');
+      //     }
+      //   }
+      // })
+      // }
+
+      // 추천 레시피 랜덤 목록 ajax 
+      $.ajax({
+        type: "GET",
+        url: "/s_rand_follow_recipes",
+        data: {},
+        success: function(response){
+         if (response['result'] == 'success') {
+           let recommend_recipes = response['recommend_recipes'];
+           console.log(recommend_recipes);
+           for (let i = 0; i < recommend_recipes.length; i++) {
+            soomi_show_recipes(recommend_recipes[i]['title'])
+          } 
+          // window.location.reload(); //무한반복 
+        } else {
+          alert('레시피를 받아오지 못했습니다');
+        }
+      }
+    })
+      
+
+      // api로 넘겨받은 값을 프론트로 출력부분 수미네 반찬 공식 레시피
+
+
+    // api로 넘겨받은 값을 프론트로 출력부분 수미네 반찬 따라하 레시피
+  </script>
+  <script>
+    function soomi_official_recipes_card(image, title, posting_day, description, author, url) {
+      let temp_html = '<div class="card">\
+      <img class="card-img-top" src="' + image +'" alt="Card image cap">\
+      <div class="card-body">\
+      <h5 class="card-title">' + title + '</h5>\
+      <p class="card-text">' + posting_day + '</p>\
+      <p class="card-text">' + description + '</p>\
+      <p class="card-text">'+author+'</p>\
+      <a href="'+url+'" class="btn btn-primary" id="url_recipe" target="_blank">레시피 보기</a>\
+      <a href="' + url + '" onclick="copy_trackback(this.href)"; return false; >url 복사</a>\
+      </div>\
+      </div>';
+
+      $('#soomi_official').append(temp_html);
+    }
+
+    function soomi_follow_recipes_card(image, title, posting_day, description, author, url) {
+
+      let temp_html = '<div class="card" >\
+      <img class="card-img-top" src="' + image +'" alt="Card image cap">\
+      <div class="card-body">\
+      <h5 class="card-title">' + title + '</h5>\
+      <p class="card-text">' + posting_day + '</p>\
+      <p class="card-text">' + description + '</p>\
+      <p class="card-text">'+author+'</p>\
+      <a href="'+url+'" class="btn btn-primary" id="url_recipe" target="_blank">레시피 보기</a>\
+      <p onclick="copy_trackback(this.href)"; return false; >url 복사</p>\
+      </div>\
+      </div>';
+
+      $('#soomi_follow').append(temp_html);
+    }
+    // 추천 레시피 보여주기목록 
+    // function soomi_show_recipes(title, url) {
+    //   let temp_html = '<li>'+title+'</li>'
+    //   $('#show_all_recipe').append(temp_html);
+    // }
+
+    // 추천 레시피 랜덤으로 보여주기목록 
+    function soomi_show_recipes(title) {
+      let temp_html = '<li>'+title+'</li>'
+      $('#show_all_recipe').append(temp_html);
+    }
+
+
+
+
+  // url copy #출처*참고자료 https://jang8584.tistory.com/135
+  //세미님이 알려준 alert 기능 구현 방법//
+  function copy_trackback(trb) {
+    var IE=(document.all)?true:false;
+    if (IE) {
+      if(confirm("이 글의 트랙백 주소를 클립보드에 복사하시겠습니까?"))
+        window.clipboardData.setData("Text", trb);
+    } else {
+      temp = prompt("이 글의 트랙백 주소입니다. Ctrl+C를 눌러 클립보드로 복사하세요", trb);
+    }
+
+  }
+
+</script>
+<script>
+
+  function recipe_save(){
+      // 읽기
+      let input_email = $('#posting-email').val();
+      let url = $('#posting-url').val();
+      if(input_email ==''){
+        alert('이메일을 입력해주세요!');
+        $('#posting-email').focus();
+        return false;
+      }else if(url ==''){
+        alert('URL을 입력해주세요!');
+        $('#posting-url').focus();
+        return false;
+      }
+
+      $.ajax({
+        type: "POST", // POST 방식으로 요청하겠다.
+        url: "/save_my_recipe", // /post라는 url에 요청하겠다.
+        data: { url_give: url, email_give: input_email }, // 데이터를 주는 방법
+        success: function(response){ // 성공하면
+          if (response['result'] == 'success') {
+            alert('레시피 저장 성공!');
+            window.location.reload();
+          } else {
+            alert('서버 오류!')
+          }
+        }
+      })
+    }
+    // function recipe_search(){
+    //   // 읽기
+    //   let output_email = $('#searching-email').val();
+    //   if(output_email ==''){
+    //     alert('이메일을 입력해주세요!');
+    //     $('#searching-email').focus();
+    //     return false;
+    //   }
+    //   $.ajax({
+    //     type: "POST", // POST 방식으로 요청하겠다.
+    //     url: "/search_my_recipe", // /post라는 url에 요청하겠다.
+    //     data: { email_give: output_email }, // 데이터를 주는 방법
+    //       success: function(response){ // 성공하면
+    //         if (response['result'] == 'success') {
+    //           let find_my_recipe = response['find_my_recipe']
+    //           alert('레시피 검색 성공!');
+    //           for (let i = 0; i < find_my_recipe.length; i++) {
+    //             my_recipes_card(find_my_recipe[i]['email'],find_my_recipe[i]['image'], find_my_recipe[i]['title'], find_my_recipe[i]['posting_day'], find_my_recipe[i]['description'], find_my_recipe[i]['author'], find_my_recipe[i]['url'])
+    //           } else {
+    //             alert('서버 오류!')
+    //           }
+    //         }
+    //       }
+    //     })
+    // }
+
+    
+    // function my_recipes_card(email, image, title, posting_day, description, author, url) {
+
+    //   let temp_html = '<div class="card" >\
+    //   <img class="card-img-top" src="' + image +'" alt="Card image cap">\
+    //   <div class="card-body">\
+    //   <h5 class="card-title">' + title + '</h5>\
+    //   <p class="card-text">' + email + '</p>\
+    //   <p class="card-text">' + posting_day + '</p>\
+    //   <p class="card-text">' + description + '</p>\
+    //   <p class="card-text">'+author+'</p>\
+    //   <a href="'+url+'" class="btn btn-primary" id="url_recipe" target="_blank">레시피 보기</a>\
+    //   <a href="' + url + '" onclick="copy_trackback(this.href)"; return false; >url 복사</a>\
+    //   </div>\
+    //   </div>';
+
+    //   $('#show_my_recipe').append(temp_html);
+    // }
+
+  // ///////////////////////랜덤으로 뿌리기/////////////////////
+  // $(document).ready(function(){
+  //   listing();
+  // });
+
+  // function listing() {
+  //   console.log('화면 로딩 후 잘 실행되었습니다');
+  // }
+  // function listing() {
+  //   $.ajax({
+  //     type: "GET",
+  //     url: "/s_official_card",
+  //     data: {},
+  //     success: function(response){
+  //       console.log(response)
+  //     }
+  //   })
+  // }
+</script>
+<!-- style -->
+<style type="text/css">
+  * {
+    font-family: 'Stylish', sans-serif;
+  }
+  .wrap {
+    width: 900px;
+    margin: auto;
+  }
+  .comment {
+    color: blue;
+    font-weight: bold;
+  }
+  .form-post {
+    max-width: 500px;
+    padding: 2rem;
+    margin: 2rem auto;
+    border-color: #e9ecef;
+    border-radius: 0.3rem;
+    border: solid;
+    display: block;
+  }
+  #posting-box {
+    display: none;
+  }
+
+</style>
+</head> 
+
+<body>
+  <div class="wrap">
+    <div class="recipes_save_container">
+      <h1>레시피 담기</h1>
+      <input type="text" id="posting-email" placeholder="email">
+      <input type="text" id="posting-url" placeholder="url">
+      <button onclick="recipe_save()">레시피 저장</button>
+    </div>
+    <div class="recipes_save_container">
+      <h1>My_recipe</h1>
+      <input type="text" id="searching-email" placeholder="email">
+      <button onclick="recipe_search()">레시피 찾기</button>
+      <div class="card-columns" id="show_my_recipe">
+      </div>
+    </div>
+    <div class="recipes_save_container">
+      <h1>추천레시피!</h1>
+      <div  id="show_all_recipe">
+        <ul>
+        </ul>
+      </div>
+    </div>
+
+    <div class="paik_recipe_container">
+      <div class="soomi_official_recipe_area">
+        <h1>[김수미 공식레시피]</h1>
+        <div class="card-columns" id="soomi_official">
+          <div class="card" style="width: 18rem;">
+            <img class="card-img-top" src="https://post-phinf.pstatic.net/MjAxOTEyMjdfMTMg/MDAxNTc3NDExMzMxODI4.EaiYroKPkfbHzY7KmEat9HtVOX7LCEcM4ZTJygRIBnQg.gTzEbkX_rRFWA0FEwHYsX-5v7T6cShGRfHpzlHO4qHIg.JPEG/I9OSNyV-W-TL7yO1eeTVFD4jmPwA.jpg?type=fb500_500" alt="ard image cap">
+            <div class="card-body">
+              <h5 class="card-title">오징어초무침&밀푀유전골&해초무침3종세트</h5>
+              <p class="card-text">2020.01.31.</p>
+              <p class="card-text">수미네반찬 공식 레시피</p>
+              <p class="card-text">하이! 미세스뽀</p>
+              <a href="https://post.naver.com/viewer/postView.nhn?volumeNo=27162947&memberNo=3669297&navigationType=push" class="btn btn-primary">레시피 보기</a>
+              <button onclick="copy_trackback()" type="button" class="btn btn-dark">url 저장</button>
+            </div>
+          </div>
+
+        </div>
+      </div>
+
+      <hr><hr/>
+
+      <div class="soomi_follow_recipe_area">
+        <h1>[김수미 따라하기레시피]</h1>
+        <div class="card-columns" id="soomi_follow">
+          <div class="card" style="width: 18rem;">
+            <img class="card-img-top" src="https://post-phinf.pstatic.net/MjAxOTEyMjdfMTMg/MDAxNTc3NDExMzMxODI4.EaiYroKPkfbHzY7KmEat9HtVOX7LCEcM4ZTJygRIBnQg.gTzEbkX_rRFWA0FEwHYsX-5v7T6cShGRfHpzlHO4qHIg.JPEG/I9OSNyV-W-TL7yO1eeTVFD4jmPwA.jpg?type=fb500_500" alt="ard image cap">
+            <div class="card-body">
+              <h5 class="card-title">오징어초무침&밀푀유전골&해초무침3종세트</h5>
+              <p class="card-text">2020.01.31.</p>
+              <p class="card-text">수미네반찬 공식 레시피</p>
+              <p class="card-text">하이! 미세스뽀</p>
+              <a href="https://post.naver.com/viewer/postView.nhn?volumeNo=27162947&memberNo=3669297&navigationType=push" class="btn btn-primary">레시피 보기</a>
+              <button onclick="copy_trackback()" type="button" class="btn btn-dark">url 저장</button>
+            </div>
+          </div>
+          <div class="card" style="width: 18rem;">
+            <img class="card-img-top" src="https://post-phinf.pstatic.net/MjAxOTEwMThfNzIg/MDAxNTcxMzc0NDQ0Mzk2.UL2AMBZWfvPRBRTiOp5yRT6B7RtO0iBCJdm_ZL-ZU2Mg.Ki8vtX6HU2_80sHA3OnpxThSGNjr2QPKw437m9HWAGYg.JPEG/IpAzOj49NtHIB4Rkwkx62l6NSozQ.jpg?type=fb500_500" alt="ard image cap">
+            <div class="card-body">
+              <h5 class="card-title">'수미네' 녹두전 & 세발낙지두부찌개 & 김치수제비</h5>
+              <p class="card-text">2017.10.26.</p>
+              <p class="card-text">수미네반찬 공식 레시피</p>
+              <a href="https://post.naver.com/viewer/postView.nhn?volumeNo=26533347&memberNo=3669297&navigationType=push" class="btn btn-primary">레시피 보기</a>
+              <button onclick="copy_trackback()" type="button" class="btn btn-dark">url 저장</button>
+            </div>
+          </div>
+          <div class="card" style="width: 18rem;">
+            <img class="card-img-top" src="https://post-phinf.pstatic.net/MjAxOTEyMjBfMTMx/MDAxNTc2ODEwNzU0MTg0.B-QCVWncAzFDzGvij8SLXB0-eSQTajTSh-QsUfGPHPEg.Hhe1HiRs0jC5gyEgT4KC1gXqXgrYG1bLW7JvzNKlM8og.JPEG/I2Z9IqBduNKjCSqNmofldf3w6GDI.jpg?type=fb500_500" alt="ard image cap">
+            <div class="card-body">
+              <h5 class="card-title">낙삼새전골&과메기조림&김치콩나물국밥</h5>
+              <p class="card-text">2020.02.07.</p>
+              <p class="card-text">수미네반찬 공식 레시피</p>
+              <a href="https://post.naver.com/viewer/postView.nhn?volumeNo=27119730&memberNo=3669297&navigationType=push" class="btn btn-primary">레시피 보기</a>
+              <button onclick="copy_trackback()" type="button" class="btn btn-dark">url 저장</button>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div>
+      </div>
+    </body>
+    </html>
